@@ -6,7 +6,7 @@ source $OPENSHIFT_CARTRIDGE_SDK_BASH
 NGINX_EXEC=$OPENSHIFT_NGINX_DIR/usr/versions/$NGINX_VERSION/bin/nginx
 NGINX_CONFIG_FILE=$OPENSHIFT_NGINX_DIR/conf/nginx.conf
 NGINX_PID_FILE=$OPENSHIFT_NGINX_DIR/run/nginx.pid
-
+NGINX_PREFIX=$OPENSHIFT_NGINX_DIR/
 
 function start() {
     echo "Starting Nginx"
@@ -18,7 +18,7 @@ function start() {
         fi
 
         # nginx will always use the prefix defined at compile time unless an absolute path to the conf file is given
-        nohup "$NGINX_EXEC" -c "$NGINX_CONFIG_FILE" 2>&1
+        nohup "$NGINX_EXEC" -p "$NGINX_PREFIX" -c "$NGINX_CONFIG_FILE" 2>&1
         [ "$?" == "0" ] && wait_for_pid_file $NGINX_PID_FILE
 
     else
@@ -65,7 +65,7 @@ function reload() {
     if [ -f "$NGINX_PID_FILE" ]
     then
         pid=`cat "$NGINX_PID_FILE" 2> /dev/null`
-        output=$("$NGINX_EXEC" -c "$NGINX_CONFIG_FILE" -s reload)
+        output=$("$NGINX_EXEC" -p "$NGINX_PREFIX" -c "$NGINX_CONFIG_FILE" -s reload)
         client_result "$output"
     else
         client_result "Cannot reload Nginx as it is not running"

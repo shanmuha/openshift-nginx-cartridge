@@ -1,5 +1,5 @@
 pid        <%= ENV['OPENSHIFT_NGINX_DIR'] %>run/nginx.pid;
-error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-main.log;
+error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log;
 
 worker_processes  2;
 
@@ -33,7 +33,8 @@ http {
 
   ## General Options
   charset                   utf-8;   # adds the line "Content-Type" into response-header, same as "source_charset"
-  gzip                      on;     # disable on the fly gzip compression due to higher latency, only use gzip_static
+  gzip                      off;     # disable on the fly gzip compression due to higher latency, only use gzip_static
+  gzip_static               on;      # precompress content (gzip -9) with an external script
   ignore_invalid_headers    on;
   keepalive_requests        50;      # number of requests per connection, does not affect SPDY
   keepalive_disable         none;    # allow all browsers to use keepalive connections
