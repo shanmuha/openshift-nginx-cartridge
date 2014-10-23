@@ -1,4 +1,6 @@
 pid        <%= ENV['OPENSHIFT_NGINX_DIR'] %>run/nginx.pid;
+access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-main.log  main;
+error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-main.log;
 
 worker_processes  2;
 
@@ -21,8 +23,8 @@ http {
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access.log  main;
-    error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log;
+    access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-http.log  main;
+    error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-http.log;
 
   ## timeouts
   client_body_timeout      4s; # maximum time between packets the client can pause when sending nginx any data
@@ -32,7 +34,6 @@ http {
 
   ## General Options
   charset                   utf-8;   # adds the line "Content-Type" into response-header, same as "source_charset"
-  default_type              application/octet-stream;
   gzip                      off;     # disable on the fly gzip compression due to higher latency, only use gzip_static
   gzip_static               on;      # precompress content (gzip -9) with an external script
   gzip_proxied              any;     # allows compressed responses for any request even from proxies

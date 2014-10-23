@@ -2,8 +2,8 @@ server {
     listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %>;
     root    <%= ENV['OPENSHIFT_REPO_DIR'] %>public;
 
-    error_log <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log error;
-    access_log <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access.log main;
+    error_log <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-server.log error;
+    access_log <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-server.log main;
 
     location / {
         index  index.html index.htm;
