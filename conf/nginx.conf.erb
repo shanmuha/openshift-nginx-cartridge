@@ -23,7 +23,6 @@ http {
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
     access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-http.log  main;
-    error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-http.log;
 
   ## timeouts
   client_body_timeout      4s; # maximum time between packets the client can pause when sending nginx any data

@@ -48,9 +48,9 @@ fi
 
 
 cd $src_dir/nginx-$nginx_ver/
-./configure --with-pcre=$src_dir/pcre-$pcre_ver/ --with-http_ssl_module
+./configure --with-pcre=$src_dir/pcre-$pcre_ver/ --http-log-path=logs/access.log --error-log-path=logs/error.log --with-http_gzip_static_module --with-http_stub_status_module --with-http_ssl_module
 make
 cp -f objs/nginx $bin_dir
 mkdir -p $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin
-cp $bin_dir/nginx $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin/
+cp -f $bin_dir/nginx $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin/
 make clean
