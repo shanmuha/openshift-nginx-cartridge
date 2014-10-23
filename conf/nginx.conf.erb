@@ -1,5 +1,4 @@
 pid        <%= ENV['OPENSHIFT_NGINX_DIR'] %>run/nginx.pid;
-access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-main.log  main;
 error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error-main.log;
 
 worker_processes  2;
