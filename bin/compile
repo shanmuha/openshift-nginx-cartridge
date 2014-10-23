@@ -51,4 +51,7 @@ cd $src_dir/nginx-$nginx_ver/
 ./configure --with-pcre=$src_dir/pcre-$pcre_ver/ --with-http_ssl_module
 make
 cp -f objs/nginx $bin_dir
+mkdir $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/
+mkdir $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin
+cp $bin_dir/nginx $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin/
 make clean
