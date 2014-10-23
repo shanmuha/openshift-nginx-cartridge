@@ -24,10 +24,45 @@ http {
     access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access.log  main;
     error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log;
 
-    sendfile  on;
-    gzip      on;
+  ## timeouts
+  client_body_timeout      4s; # maximum time between packets the client can pause when sending nginx any data
+  client_header_timeout    4s; # maximum time the client has to send the entire header to nginx
+  keepalive_timeout       75s; # timeout which a single keep-alive client connection will stay open
+  send_timeout            15s; # maximum time between packets nginx is allowed to pause when sending the client data
 
-    keepalive_timeout  65;
+  ## General Options
+  charset                   utf-8;   # adds the line "Content-Type" into response-header, same as "source_charset"
+  default_type              application/octet-stream;
+  gzip                      off;     # disable on the fly gzip compression due to higher latency, only use gzip_static
+  gzip_static               on;      # precompress content (gzip -9) with an external script
+  gzip_proxied              any;     # allows compressed responses for any request even from proxies
+  ignore_invalid_headers    on;
+  keepalive_requests        50;      # number of requests per connection, does not affect SPDY
+  keepalive_disable         none;    # allow all browsers to use keepalive connections
+  max_ranges                1;       # allow a single range header for resumed downloads and to stop large range header DoS attacks
+  msie_padding              off;
+  output_buffers            1 512;
+  read_ahead                512K;    # kernel read head set to the output_buffers
+  recursive_error_pages     on;
+  reset_timedout_connection on;      # reset timed out connections freeing ram
+  sendfile                  on;      # on for decent direct disk I/O
+  server_tokens             off;     # version number in error pages
+  server_name_in_redirect   off;     # if off, nginx will use the requested Host header
+  source_charset            utf-8;   # same value as "charset"
+  tcp_nodelay               on;      # Nagle buffering algorithm, used for keepalive only
+  tcp_nopush                on;
+  client_body_buffer_size   1K;
+  client_header_buffer_size 1K;
+  client_max_body_size      1K;
+  large_client_header_buffers 2 1K;
+
+
+  ## Request limits
+  limit_req_zone  $binary_remote_addr  zone=gulag:1m   rate=90r/m;
+
+  ## Log Format
+  log_format  main  '$remote_addr $host [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $ssl_cipher $request_time';
+
 
     include  <%= ENV['OPENSHIFT_REPO_DIR'] %>nginx.conf;
 }
