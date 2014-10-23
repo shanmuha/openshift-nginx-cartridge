@@ -55,12 +55,5 @@ http {
   large_client_header_buffers 2 1K;
 
 
-  ## Request limits
-  limit_req_zone  $binary_remote_addr  zone=gulag:1m   rate=90r/m;
-
-  ## Log Format
-  log_format  main  '$remote_addr $host [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $ssl_cipher $request_time';
-
-
     include  <%= ENV['OPENSHIFT_REPO_DIR'] %>nginx.conf;
 }
