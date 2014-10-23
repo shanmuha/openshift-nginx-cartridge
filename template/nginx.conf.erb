@@ -1,8 +1,30 @@
 server {
-    listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %>;
-    root    <%= ENV['OPENSHIFT_REPO_DIR'] %>public;
+	listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %>;
+	root    <%= ENV['OPENSHIFT_REPO_DIR'] %>public;
 
-    location / {
-        index  index.html index.htm;
-    }
+        location ~* \.(html)$ {
+                expires 2h;
+                add_header Pragma public;
+                add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+        }
+
+        location ~* \.(css)$ {
+                expires 168h;
+                add_header Pragma public;
+                add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+        }
+
+        location ~* \.(js|gif|jpe?g|png|woff|woff2|svg|ttf|eot|ico)$ {
+                expires 168h;
+                add_header Pragma public;
+                add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+        }
+
+
+        location / {
+                index  index.html index.htm;
+                expires 2h;
+                add_header Pragma public;
+                add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+        }
 }
