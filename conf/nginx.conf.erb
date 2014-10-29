@@ -2,58 +2,71 @@ pid        <%= ENV['OPENSHIFT_NGINX_DIR'] %>run/nginx.pid;
 error_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/error.log;
 
 worker_processes  2;
+worker_priority 10;
 
 events {
-    worker_connections  1024;
+	worker_connections	512;
+	accept_mutex		on;
+	accept_mutex_delay	500ms;
 }
 
 
 http {
-    include       mime.types;
-    default_type  application/octet-stream;
+	include       mime.types;
+	default_type  application/octet-stream;
 
-    client_body_temp_path  <%= ENV['OPENSHIFT_TMP_DIR'] %>client_temp;
-    proxy_temp_path        <%= ENV['OPENSHIFT_TMP_DIR'] %>proxy_temp;
-    fastcgi_temp_path      <%= ENV['OPENSHIFT_TMP_DIR'] %>fastcgi_temp;
-    uwsgi_temp_path        <%= ENV['OPENSHIFT_TMP_DIR'] %>uwsgi_temp;
-    scgi_temp_path         <%= ENV['OPENSHIFT_TMP_DIR'] %>scgi_temp;
+	client_body_temp_path  <%= ENV['OPENSHIFT_TMP_DIR'] %>client_temp;
+	proxy_temp_path        <%= ENV['OPENSHIFT_TMP_DIR'] %>proxy_temp;
+	fastcgi_temp_path      <%= ENV['OPENSHIFT_TMP_DIR'] %>fastcgi_temp;
+	uwsgi_temp_path        <%= ENV['OPENSHIFT_TMP_DIR'] %>uwsgi_temp;
+	scgi_temp_path         <%= ENV['OPENSHIFT_TMP_DIR'] %>scgi_temp;
 
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
+	log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+			  '$status $body_bytes_sent "$http_referer" '
+			  '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-http.log  main;
+	access_log  <%= ENV['OPENSHIFT_NGINX_DIR'] %>logs/access-http.log  main;
 
-  ## timeouts
-  client_body_timeout      4s; # maximum time between packets the client can pause when sending nginx any data
-  client_header_timeout    4s; # maximum time the client has to send the entire header to nginx
-  keepalive_timeout       75s; # timeout which a single keep-alive client connection will stay open
-  send_timeout            15s; # maximum time between packets nginx is allowed to pause when sending the client data
+	## timeouts
+	client_body_timeout      5s; # maximum time between packets the client can pause when sending nginx any data
+	client_header_timeout    5s; # maximum time the client has to send the entire header to nginx
+	keepalive_timeout       75s; # timeout which a single keep-alive client connection will stay open
+	send_timeout            15s; # maximum time between packets nginx is allowed to pause when sending the client data
 
-  ## General Options
-  charset                   utf-8;   # adds the line "Content-Type" into response-header, same as "source_charset"
-  gzip                      off;     # disable on the fly gzip compression due to higher latency, only use gzip_static
-  gzip_static               on;      # precompress content (gzip -9) with an external script
-  ignore_invalid_headers    on;
-  keepalive_requests        50;      # number of requests per connection, does not affect SPDY
-  keepalive_disable         none;    # allow all browsers to use keepalive connections
-  max_ranges                1;       # allow a single range header for resumed downloads and to stop large range header DoS attacks
-  msie_padding              off;
-  output_buffers            1 512;
-  read_ahead                512K;    # kernel read head set to the output_buffers
-  recursive_error_pages     on;
-  reset_timedout_connection on;      # reset timed out connections freeing ram
-  sendfile                  on;      # on for decent direct disk I/O
-  server_tokens             off;     # version number in error pages
-  server_name_in_redirect   off;     # if off, nginx will use the requested Host header
-  source_charset            utf-8;   # same value as "charset"
-  tcp_nodelay               on;      # Nagle buffering algorithm, used for keepalive only
-  tcp_nopush                on;
-  client_body_buffer_size   1K;
-  client_header_buffer_size 1K;
-  client_max_body_size      1K;
-  large_client_header_buffers 2 1K;
+	## General Options
+	charset                   utf-8;   # adds the line "Content-Type" into response-header, same as "source_charset"
+
+	## Compression
+	gzip_vary                 on;  # send response header "Vary: Accept-Encoding"
+	gzip_proxied             any;  # allows compressed responses for any request even from proxies
+	
+	## caching
+	open_file_cache           max=1000 inactive=2h;
+	open_file_cache_errors    on;
+	open_file_cache_min_uses  1;
+	open_file_cache_valid     1h;
+
+	## other stuff
+	ignore_invalid_headers    on;
+	keepalive_requests        50;      # number of requests per connection, does not affect SPDY
+	keepalive_disable         none;    # allow all browsers to use keepalive connections
+	max_ranges                1;       # allow a single range header for resumed downloads and to stop large range header DoS attacks
+	msie_padding              off;
+	output_buffers            1 512;
+	read_ahead                512K;    # kernel read head set to the output_buffers
+	recursive_error_pages     on;
+	reset_timedout_connection on;      # reset timed out connections freeing ram
+	sendfile                  on;      # on for decent direct disk I/O
+	server_tokens             off;     # version number in error pages
+	server_name_in_redirect   off;     # if off, nginx will use the requested Host header
+	source_charset            utf-8;   # same value as "charset"
+	tcp_nodelay               on;      # Nagle buffering algorithm, used for keepalive only
+	tcp_nopush                on;
+	client_body_buffer_size   1K;
+	client_header_buffer_size 1K;
+	client_max_body_size      1K;
+	large_client_header_buffers 2 1K;
 
 
-    include  <%= ENV['OPENSHIFT_REPO_DIR'] %>nginx.conf;
+	include  <%= ENV['OPENSHIFT_REPO_DIR'] %>nginx.conf;
 }
