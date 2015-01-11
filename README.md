@@ -1,12 +1,12 @@
-## Openshift Nginx Cartridge
+## Scalable Openshift Nginx Cartridge
 
-A cartridge for openshift that enables Nginx to be used as the web server.
+A cartridge for OpenShift that enables NGINX to be used. This OpenShift cartidge is scalable, I've tested it with 3 gears, it worked jolly good. No reason to believe it wouldn't work with a larger amount. 
 
-This is a forked version from [here](https://github.com/gsterjov/openshift-nginx-cartridge). It has been updated to Nginx 1.7.9, some of the nginx modules are different, and the nginx config has been slightly changed.
+This is a forked version of someone elses work from [here](https://github.com/gsterjov/openshift-nginx-cartridge). It has been updated to NGINX version 1.7.9, and some of the NGINX modules are different than the original. The NGINX config file supplied with the cartidge has also been changed.
 
 ### Installation
 
-To install this cartridge use the cartridge reflector when creating an app
+To install this cartridge you use the cartridge reflector from the command line. In the example below a "myapp" directory will be created in the location where the command is run as the git repo where your static web content will live will be cloned there.
 
 	rhc create-app --scaling myapp http://cartreflect-claytondev.rhcloud.com/reflect?github=dustyherald/openshift-nginx-cartridge
 
@@ -33,14 +33,15 @@ On pushing to OpenShift you'll see an error that looks something like this:
 	remote: Starting Nginx
 	remote: nginx: [alert] could not open error log file: open() "error.log" failed (2: No such file or directory)
 
-This seems to be an error in deployment, as the error.log is written to and shows errors correctly when viewing the file.
+This seems to be something going odd during the deployment process, as when NGINX is running the error.log is written to and shows errors correctly when viewing the file.
 
 ### Compile options
 
 For those interested in upgrading this yourself at some point, perhaps for your own fork which you maintain, this is how I've done updates:
 
-SSH to an OpenShift gear (rhc app-show appname to get the address), go to $OPENSHIFT_TMP_DIR ($ cd $OPENSHIFT_TMP_DIR) and do a wget for the latest nginx and pcre and unpack them. Navigate into the nginx folder and you can configure with a command like this:
+SSH to an OpenShift gear (<code>rhc app-show appname</code> to get the address), go to $OPENSHIFT_TMP_DIR (<code>$ cd $OPENSHIFT_TMP_DIR</code>) and do a wget for the latest NGINX and PCRE and unpack them. Navigate into the created NGINX folder and you can configure the install, I've used this when compiling the binary included in this cartridge:
 
 	./configure --with-pcre=/tmp/pcre-8.36 --http-log-path=logs/access.log --error-log-path=logs/error.log --with-http_gzip_static_module --with-http_stub_status_module --with-http_ssl_module
 
-copy the objs/nginx file to $OPENSHIFT_DATA_DIR (cp objs/nginx $OPENSHIFT_DATA_DIR) exit, and scp the file to your local machine to which you've cloned this repository, place the binary in the properly named usr folder in the repo, and update the manifest file in the metadata folder, and some of the files in the bin folder. 
+Run a <code>make</code> and when it is done copy the binary at <code>objs/nginx</code> to $OPENSHIFT_DATA_DIR (<code>cp objs/nginx $OPENSHIFT_DATA_DIR</code>) exit the SSH session. Now you can scp the file to your local machine (to which you've cloned this cartridge repository). Place the binary in the properly named <code>usr</code> folder, and update the manifest file in the metadata folder, and some of the files in the bin folder. Push it to a repo somewhere, test it on a new OpenShift gear.
+
