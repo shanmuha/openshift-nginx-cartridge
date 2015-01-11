@@ -35,6 +35,8 @@ On pushing to OpenShift you'll see an error that looks something like this:
 
 This seems to be something going odd during the deployment process, as when NGINX is running the error.log is written to and shows errors correctly when viewing the file.
 
+Unless you upgrade the amount of storage available you only have 1 gigabyte of space per gear, this includes the git repository which will track your static content folder. Due to the way this stuff is copied around the OpenShift gear, with 1 gig of space, you'll be able to fit somewhere around 300 megabytes of static content before youll need to add more storage to your gear(s).
+
 ### Compile options
 
 For those interested in upgrading this yourself at some point, perhaps for your own fork which you maintain, this is how I've done updates:
