@@ -2,6 +2,7 @@
 
 A cartridge for openshift that enables Nginx to be used as the web server.
 
+This is a forked version from [here](https://github.com/gsterjov/openshift-nginx-cartridge). It has been updated to Nginx 1.7.9, some of the nginx modules are different, and the nginx config has been slightly changed.
 
 ### Installation
 
