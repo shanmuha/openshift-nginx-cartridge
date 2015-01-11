@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Openshift-nginx-cartridge by dustyherald</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Openshift-nginx-cartridge</h1>
+        <h2>A Scalable NGINX Cartridge for OpenShift.</h2>
+        <a href="https://github.com/dustyherald/openshift-nginx-cartridge" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h2>
+<a id="scalable-openshift-nginx-cartridge" class="anchor" href="#scalable-openshift-nginx-cartridge" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scalable Openshift Nginx Cartridge</h2>
+
+<p>A cartridge for OpenShift that enables NGINX to be used. This OpenShift cartidge is scalable, I've tested it with 3 gears, it worked jolly good. No reason to believe it wouldn't work with a larger amount. </p>
+
+<p>This is a forked version of someone elses work from <a href="https://github.com/gsterjov/openshift-nginx-cartridge">here</a>. It has been updated to NGINX version 1.7.9, and some of the NGINX modules are different than the original. The NGINX config file supplied with the cartidge has also been changed.</p>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>To install this cartridge you use the cartridge reflector from the command line. In the example below a "myapp" directory will be created in the location where the command is run as the git repo where your static web content will live will be cloned there.</p>
+
+<pre><code>rhc create-app --scaling myapp http://cartreflect-claytondev.rhcloud.com/reflect?github=dustyherald/openshift-nginx-cartridge
+</code></pre>
+
+<h3>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h3>
+
+<p>The cartridge installs two config files. One at <code>$OPENSHIFT_NGINX_DIR/conf/nginx.conf</code> which gets loaded by the executable
+and sets up specific app configuration such as logs and pid files.</p>
+
+<p>The config then includes another nginx.conf which must exist at <code>$OPENSHIFT_REPO_DIR/nginx.conf</code>. This config should
+contain all your server specific set up including which ip/port to listen on.</p>
+
+<p>The repo nginx.conf is actually seen in your repository as <code>nginx.conf.erb</code> so environment variables can be used
+in the config. Every time the server starts it first processes <code>nginx.conf.erb</code>.</p>
+
+<p>A <code>public/</code> folder is included where static content is served by default. However, as can be seen in the <code>nginx.conf.erb</code> file it
+is entirely configurable and only exists as a form of documentation.</p>
+
+<h3>
+<a id="known-issues" class="anchor" href="#known-issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Issues</h3>
+
+<p>On pushing to OpenShift you'll see an error that looks something like this:</p>
+
+<pre><code>remote: Starting Nginx
+remote: nginx: [alert] could not open error log file: open() "error.log" failed (2: No such file or directory)
+</code></pre>
+
+<p>This seems to be something going odd during the deployment process, as when NGINX is running the error.log is written to and shows errors correctly when viewing the file.</p>
+
+<p>Unless you upgrade the amount of storage available you only have 1 gigabyte of space per gear, this includes the git repository which will track your static content folder. Due to the way this stuff is copied around the OpenShift gear, with 1 gig of space, you'll be able to fit somewhere around 300 megabytes of static content before youll need to add more storage to your gear(s).</p>
+
+<h3>
+<a id="compile-options" class="anchor" href="#compile-options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compile options</h3>
+
+<p>For those interested in upgrading this yourself at some point, perhaps for your own fork which you maintain, this is how I've done updates:</p>
+
+<p>SSH to an OpenShift gear (<code>rhc app-show appname</code> to get the address), go to $OPENSHIFT_TMP_DIR (<code>$ cd $OPENSHIFT_TMP_DIR</code>) and do a wget for the latest NGINX and PCRE and unpack them. Navigate into the created NGINX folder and you can configure the install, I've used this when compiling the binary included in this cartridge:</p>
+
+<pre><code>./configure --with-pcre=/tmp/pcre-8.36 --http-log-path=logs/access.log --error-log-path=logs/error.log --with-http_gzip_static_module --with-http_stub_status_module --with-http_ssl_module
+</code></pre>
+
+<p>Run a <code>make</code> and when it is done copy the binary at <code>objs/nginx</code> to $OPENSHIFT_DATA_DIR (<code>cp objs/nginx $OPENSHIFT_DATA_DIR</code>) exit the SSH session. Now you can scp the file to your local machine (to which you've cloned this cartridge repository). Place the binary in the properly named <code>usr</code> folder, and update the manifest file in the metadata folder, and some of the files in the bin folder. Push it to a repo somewhere, test it on a new OpenShift gear.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/dustyherald/openshift-nginx-cartridge/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/dustyherald/openshift-nginx-cartridge/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/dustyherald/openshift-nginx-cartridge"></a> is maintained by <a href="https://github.com/dustyherald">dustyherald</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
