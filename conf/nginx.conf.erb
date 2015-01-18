@@ -41,6 +41,7 @@ http {
 	gzip_proxied             any;  # allows compressed responses for any request even from proxies
 	
 	## caching
+	proxy_cache_path 	  <%= ENV['OPENSHIFT_NGINX_DIR'] %>cache keys_zone=STATIC:10m inactive=24h max_size=125m;
 	open_file_cache           max=1000 inactive=2h;
 	open_file_cache_errors    on;
 	open_file_cache_min_uses  1;
