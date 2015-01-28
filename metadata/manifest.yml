@@ -3,9 +3,9 @@ Cartridge-Short-Name: NGINX
 Display-Name: Nginx
 Version: "1.7.9"
 Versions: ["1.7.9"]
-Website: https://github.com/dustyherald/openshift-nginx-cartridge
-Cartridge-Version: 0.0.5
-Cartridge-Vendor: dustyherald
+Website: https://github.com/shanmuha/openshift-nginx-cartridge
+Cartridge-Version: 0.0.5.1
+Cartridge-Vendor: shanmu
 Categories:
   - service
   - nginx
