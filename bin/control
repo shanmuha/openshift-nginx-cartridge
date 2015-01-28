@@ -24,6 +24,11 @@ function start() {
     else
         echo "WARN: Could not find the compiled application versions/$NGINX_VERSION/bin/nginx, will not start"
     fi
+	
+    if [ -f "$OPENSHIFT_REPO_DIR/.openshift/action_hooks/start" ]; then
+       echo "Starting action hooks"
+       $OPENSHIFT_REPO_DIR/.openshift/action_hooks/start
+    fi
 }
 
 
@@ -34,6 +39,11 @@ function stop() {
         pid=`cat "$NGINX_PID_FILE" 2> /dev/null`
         eval "'$NGINX_EXEC' -c '$NGINX_CONFIG_FILE' -s stop"
         wait_for_stop $pid
+    fi
+    
+	if [ -f "$OPENSHIFT_REPO_DIR/.openshift/action_hooks/stop" ]; then
+       echo "Stopping action hooks"
+       $OPENSHIFT_REPO_DIR/.openshift/action_hooks/stop
     fi
 }
 
