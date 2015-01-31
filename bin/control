@@ -5,8 +5,8 @@ source $OPENSHIFT_CARTRIDGE_SDK_BASH
 
 NGINX_EXEC=$OPENSHIFT_OPENRESTY_DIR/openresty/nginx/sbin/nginx
 NGINX_CONFIG_FILE=$OPENSHIFT_OPENRESTY_DIR/conf/nginx.conf
-NGINX_PID_FILE=$OPENSHIFT_NGINX_DIR/run/nginx.pid
-NGINX_PREFIX=$OPENSHIFT_NGINX_DIR/
+NGINX_PID_FILE=$OPENSHIFT_OPENRESTY_DIR/run/nginx.pid
+NGINX_PREFIX=$OPENSHIFT_OPENRESTY_DIR/
 
 function start() {
     echo "Starting Nginx"
@@ -22,7 +22,7 @@ function start() {
         [ "$?" == "0" ] && wait_for_pid_file $NGINX_PID_FILE
 
     else
-        echo "WARN: Could not find the compiled application versions/$NGINX_VERSION/bin/nginx, will not start"
+        echo "WARN: Could not find the compiled application versions/$NGINX_EXEC, will not start"
     fi
 	
     if [ -f "$OPENSHIFT_REPO_DIR/.openshift/action_hooks/start" ]; then
@@ -57,7 +57,7 @@ function restart() {
 
 function status() {
     res=0
-    output=$(curl -s -m 30 http://$OPENSHIFT_NGINX_IP:$OPENSHIFT_NGINX_PORT/ &> /dev/null) || res=1
+    output=$(curl -s -m 30 http://$OPENSHIFT_OPENRESTY_IP:$OPENSHIFT_OPENRESTY_PORT/ &> /dev/null) || res=1
 
     if [ $res -eq 0 ]
     then
@@ -84,7 +84,7 @@ function reload() {
 
 
 function tidy() {
-    client_message "Emptying log dir: $OPENSHIFT_NGINX_DIR/logs"
+    client_message "Emptying log dir: $OPENSHIFT_OPENSHIFT_DIR/logs"
     shopt -s dotglob
     rm -rf logs/*
 }

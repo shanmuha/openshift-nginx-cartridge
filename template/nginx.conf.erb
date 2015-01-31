@@ -1,5 +1,5 @@
 server {
-	listen  <%= ENV['OPENSHIFT_NGINX_IP'] %>:<%= ENV['OPENSHIFT_NGINX_PORT'] %>;
+	listen  <%= ENV['OPENSHIFT_OPENRESTY_IP'] %>:<%= ENV['OPENSHIFT_OPENRESTY_PORT'] %>;
 	root    <%= ENV['OPENSHIFT_REPO_DIR'] %>public;
 
         location ~* \.(html)$ {
@@ -38,7 +38,7 @@ server {
 #	#in case using things like spring boot, it can be proxied here:
 #      location ^~ /api/ {
 #
-#        proxy_pass http://<%= ENV['OPENSHIFT_NGINX_IP'] %>:9000/api/;
+#        proxy_pass http://<%= ENV['OPENSHIFT_OPENRESTY_IP'] %>:9000/api/;
 #
 #        # Rewrite HTTPS requests from WAN to HTTP requests on LAN
 #        #proxy_redirect http:// https://;

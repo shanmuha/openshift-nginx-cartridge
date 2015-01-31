@@ -13,7 +13,7 @@ To install this cartridge you use the cartridge reflector from the command line.
 
 ### Configuration
 
-The cartridge installs two config files. One at <code>$OPENSHIFT_NGINX_DIR/conf/nginx.conf</code> which gets loaded by the executable
+The cartridge installs two config files. One at <code>$OPENSHIFT_OPENRESTY_DIR/conf/nginx.conf</code> which gets loaded by the executable
 and sets up specific app configuration such as logs and pid files.
 
 The config then includes another nginx.conf which must exist at <code>$OPENSHIFT_REPO_DIR/nginx.conf</code>. This config should
