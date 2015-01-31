@@ -27,6 +27,8 @@ luarocks_ver=${LUAROCKS_VERSION:-2.1.2}
 luarocks_file=${LUAROCKS_FILE:-luarocks-$luarocks_ver.tar.gz}
 luarocks_url=${LUAROCKS_URL:-http://luarocks.org/releases/$luarocks_file}
 
+export PATH=$PATH:/sbin
+
 build_PCRE()
 {
 	# no build step
