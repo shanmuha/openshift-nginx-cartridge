@@ -7,50 +7,102 @@ set -eo pipefail
 mkdir -p "$1/out" "$1/src"
 bin_dir=$(cd "$1/out" && pwd)
 src_dir=$(cd "$1/src" && pwd)
+install_dir=$OPENSHIFT_OPENRESTY_DIR
 buildpack=$(dirname $(dirname $0))
+make_jobs=$(grep processor /proc/cpuinfo  | wc -l)
 
 pcre_ver=${PCRE_VERSION:-8.36}
 pcre_file=${PCRE_FILE:-pcre-$pcre_ver.tar.gz}
 pcre_url=${PCRE_URL:-http://sourceforge.net/projects/pcre/files/pcre/$pcre_ver/$pcre_file}
 
-nginx_ver=${NGINX_VERSION:-1.7.9}
-nginx_file=${NGINX_FILE:-nginx-$nginx_ver.tar.gz}
-nginx_url=${NGINX_URL:-http://nginx.org/download/$nginx_file}
+#nginx_ver=${NGINX_VERSION:-1.7.9}
+#nginx_file=${NGINX_FILE:-nginx-$nginx_ver.tar.gz}
+#nginx_url=${NGINX_URL:-http://nginx.org/download/$nginx_file}
+ 
+openresty_ver=${OPENRESTY_VER:-1.7.7.1}
+openresty_file=${OPENRESTY_FILE:-ngx_openresty-$openresty_ver.tar.gz}
+openresty_url=${OPENRESTY_URL:-http://openresty.org/download/$openresty_file}
+
+luarocks_ver=${LUAROCKS_VERSION:-2.1.2}
+luarocks_file=${LUAROCKS_FILE:-luarocks-$luarocks_ver.tar.gz}
+luarocks_url=${LUAROCKS_URL:-http://luarocks.org/releases/$luarocks_file}
+
+build_PCRE()
+{
+	# no build step
+	return
+}
+
+install_PCRE()
+{
+	# no install step
+	return
+}
+
+build_OpenResty()
+{
+	echo "----> Building OpenRes-ty"
+	cd $src_dir/OpenResty-$openresty_ver/ngx_openresty-$openresty_ver/
+	./configure --prefix=$install_dir --with-pcre=$src_dir/PCRE-$pcre_ver/pcre-$pcre_ver/ --http-log-path=logs/access.log --error-log-path=logs/error.log --with-http_gzip_static_module --with-http_stub_status_module --with-http_ssl_module --with-pcre-jit
+	make -j${make_jobs:-2}
+}
+
+install_OpenResty()
+{
+	cd $src_dir/OpenResty-$openresty_ver/ngx_openresty-$openresty_ver/
+	#[ -d $install_dir/luajit/include ] && rm -rf $install_dir/luajit/include
+	make install
+	make clean
+	# LuaRocks not finding luajit's headers
+	#ln -sf $install_dir/luajit/include/luajit-*/* $install_dir/luajit/include/
+	mkdir -p $install_dir/usr/bin
+        ln -sf $install_dir/luajit/bin/luajit* $install_dir/usr/bin/lua
+}
+
+build_LuaRocks()
+{
+	echo "----> Building LuaRocks"
+	cd $src_dir/LuaRocks-$luarocks_ver/luarocks-$luarocks_ver/
+	./configure --prefix=$install_dir --with-lua=$install_dir --with-lua-include=$install_dir/luajit/include/luajit-2.1 --with-lua-lib=$install_dir/lualib
+	make
+}
+
+install_LuaRocks()
+{
+	cd $src_dir/LuaRocks-$luarocks_ver/luarocks-$luarocks_ver/
+	make install
+	#luarocks_config $install_dir
+	ln -sf $install_dir/etc/luarocks/config-5.1.lua $install_dir/etc/luarocks/config.lua
+	make clean
+}
 
 
-if test -d $src_dir/pcre-$pcre_ver
-then
-    echo "-----> Using PCRE $pcre_ver"
-else
-    mkdir -p $src_dir/pcre-$pcre_ver
-    cd $src_dir
-    echo    "       First download, may take several minutes"
-    echo -n "-----> Installing PCRE $pcre_ver..."
-    curl -sOL $pcre_url
-    tar zxf $pcre_file
-    rm -f $pcre_file
-    echo " done"
-fi
+# Arguments:
+# Name
+# Version
+# url
+# filename
+get_ver()
+{
+	if test -d $src_dir/$1-$2
+	then
+		echo "-----> Using $1 $2"
+		install_$1
+	else
+		mkdir -p $src_dir/$1-$2
+		cd $src_dir/$1-$2
+		echo "First download, may take several minutes"
+		echo "-----> Installing $1 $2 from $3..."
+		curl -sOL $3
+		tar zxf $4
+		rm -f $4
+		build_$1
+		install_$1
+		echo " done"
+	fi
+}
 
-if test -d $src_dir/nginx-$nginx_ver
-then
-    echo "-----> Using Nginx $nginx_ver"
-else
-    mkdir -p $src_dir/nginx-$nginx_ver
-    cd $src_dir
-    echo    "       First download, may take several minutes"
-    echo -n "-----> Installing Nginx $nginx_ver..."
-    curl -sO $nginx_url
-    tar zxf $nginx_file
-    rm -f $nginx_file
-    echo " done"
-fi
-
-
-cd $src_dir/nginx-$nginx_ver/
-./configure --with-pcre=$src_dir/pcre-$pcre_ver/ --http-log-path=logs/access.log --error-log-path=logs/error.log --with-http_gzip_static_module --with-http_stub_status_module --with-http_ssl_module
-make
-cp -f objs/nginx $bin_dir
-mkdir -p $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin
-cp -f $bin_dir/nginx $OPENSHIFT_NGINX_DIR/usr/versions/$nginx_ver/bin/
-make clean
+get_ver "PCRE" "$pcre_ver" "$pcre_url" "$pcre_file"
+echo $openresty_url
+get_ver "OpenResty" "$openresty_ver" "$openresty_url" "$openresty_file"
+get_ver "LuaRocks" "$luarocks_ver" "$luarocks_url" "$luarocks_file"

@@ -3,8 +3,8 @@
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
 
 
-NGINX_EXEC=$OPENSHIFT_NGINX_DIR/usr/versions/$NGINX_VERSION/bin/nginx
-NGINX_CONFIG_FILE=$OPENSHIFT_NGINX_DIR/conf/nginx.conf
+NGINX_EXEC=$OPENSHIFT_OPENRESTY_DIR/openresty/nginx/sbin/nginx
+NGINX_CONFIG_FILE=$OPENSHIFT_OPENRESTY_DIR/conf/nginx.conf
 NGINX_PID_FILE=$OPENSHIFT_NGINX_DIR/run/nginx.pid
 NGINX_PREFIX=$OPENSHIFT_NGINX_DIR/
 
@@ -91,17 +91,17 @@ function tidy() {
 
 
 function update() {
-    version=${NGINX_VERSION:-1.7.9}
+    version=${OPENRESTY_VERSION:-1.7.7.1}
 
-    echo "Rebuilding Nginx v$version"
+    echo "Rebuilding Openresty v$version"
     stop
 
     mkdir -p tmp/build
     bin/compile tmp/build
 
-    bin_dir="usr/versions/$version/bin"
-    mkdir -p $bin_dir
-    cp -f tmp/build/out/nginx $bin_dir
+    #bin_dir="usr/versions/$version/bin"
+    #mkdir -p $bin_dir
+    #cp -f tmp/build/out/nginx $bin_dir
     
     rm -rf tmp/build
 }
